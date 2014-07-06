@@ -1,0 +1,12 @@
+{
+	"name": "user-auth-example",
+	"version": "0.0.1",
+	"dependencies": {
+		"express": "4.1.x",
+		"body-parser": "1.x.x",
+		"cookie-parser": "1.x.x",
+		"express-session": "1.x.x",
+		"mongoose": "3.x.x",
+		"jade": "1.3.x"
+	}
+}
