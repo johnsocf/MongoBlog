@@ -52,18 +52,6 @@ app.post('/signup', function (req, res, next) {
 		if (err) return next(err);
 		res.redirect('/login/' + user.email);
 	});
-
-	// setTimeout(function() {
-
- //    // Fetch the document
- //    app.users.findOne(req.body.user, function(err, item) {
- //      if (err) return next(err);
- //      console.log(req.body);
-
- //      res.redirect('/login/' + item.email);
- //      //server.close();
- //    })
- //  }, 100);
 });
 
 app.get('/login/:signupEmail', function (req, res) {
@@ -94,18 +82,6 @@ app.get('/logout', function (req, res) {
 
 // connect to the database
 mongoose.connect('mongodb://127.0.0.1/my-website');
-// new mongodb.Db('my-website', server).open(function (err, client) {
-// 	if (err) throw err;
-// 	console.log('\033[96m + \033[39m connected to mongodb');
-// 	app.users = new mongodb.Collection(client, 'users');
-
-// 	client.ensureIndex('users', 'password', function (err) {
-// 		if (err) throw err;
-
-// 		console.log('\033[96m + \033[39m ensured indexes');
-// 	});
-
-// });
 
 app.listen(3000, function () {
   console.log('\033[96m + \033[39m app listening on *:3000');
@@ -121,5 +97,3 @@ var User = mongoose.model('User', new Schema ({
 	email: {type: String, unique: true},
 	password: {type: String, index: true}
 }));
-
-
