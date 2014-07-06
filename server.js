@@ -2,7 +2,7 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
-    monoose = require('mongoose');
+    mongoose = require('mongoose');
 
 app = express();
 app.use(bodyParser.urlencoded({
@@ -19,12 +19,14 @@ app.use(function (req, res, next) {
 	if (req.session.loggedIn) {
 		res.locals.authenticated = true;
 		console.log(req.session.loggedIn);
-		app.users.findOne({ _id: mongodb.ObjectID.createFromHexString(req.session.loggedIn) }, function (err, item) {
+		User.findById( req.session.loggedIn, function (err, item) {
 			if (err) return next(err);
 			if (item) {
 				var myName = item.first;
+				var last = item.last;
 				console.log(myName);
 				res.locals.me = myName;
+				res.locals.last = last;
 				next();
 			}
 			console.log(item);
@@ -44,20 +46,24 @@ app.get('/signup', function (req, res) {
 });
 
 app.post('/signup', function (req, res, next) {
-	app.users.insert(req.body.user, function (err, records) {
+
+	var user = new User(req.body.user);
+	user.save(function (err) {
 		if (err) return next(err);
+		res.redirect('/login/' + user.email);
 	});
-	setTimeout(function() {
 
-    // Fetch the document
-    app.users.findOne(req.body.user, function(err, item) {
-      if (err) return next(err);
-      console.log(req.body);
+	// setTimeout(function() {
 
-      res.redirect('/login/' + item.email);
-      //server.close();
-    })
-  }, 100);
+ //    // Fetch the document
+ //    app.users.findOne(req.body.user, function(err, item) {
+ //      if (err) return next(err);
+ //      console.log(req.body);
+
+ //      res.redirect('/login/' + item.email);
+ //      //server.close();
+ //    })
+ //  }, 100);
 });
 
 app.get('/login/:signupEmail', function (req, res) {
@@ -68,7 +74,7 @@ app.post('/login', function (req, res, next) {
 	setTimeout(function() {
 
     // Fetch the document
-    app.users.findOne({email: req.body.user.email, password: req.body.user.password}, function(err, item) {
+    User.findOne({email: req.body.user.email, password: req.body.user.password}, function(err, item) {
       if (err) return next(err);
       if (!item) { console.log('<p>User not found. Go back and try again'); }
       else {
@@ -86,27 +92,34 @@ app.get('/logout', function (req, res) {
 	res.redirect('/');
 });
 
-mongoose.connect('mongodb://127.0.0.1/my-website')
-new mongodb.Db('my-website', server).open(function (err, client) {
-	if (err) throw err;
-	console.log('\033[96m + \033[39m connected to mongodb');
-	app.users = new mongodb.Collection(client, 'users');
+// connect to the database
+mongoose.connect('mongodb://127.0.0.1/my-website');
+// new mongodb.Db('my-website', server).open(function (err, client) {
+// 	if (err) throw err;
+// 	console.log('\033[96m + \033[39m connected to mongodb');
+// 	app.users = new mongodb.Collection(client, 'users');
 
-	client.ensureIndex('users', 'password', function (err) {
-		if (err) throw err;
+// 	client.ensureIndex('users', 'password', function (err) {
+// 		if (err) throw err;
 
-		console.log('\033[96m + \033[39m ensured indexes');
-	});
+// 		console.log('\033[96m + \033[39m ensured indexes');
+// 	});
 
-});
-
-
-
-
-
-
+// });
 
 app.listen(3000, function () {
   console.log('\033[96m + \033[39m app listening on *:3000');
 });
+
+// define the model.
+
+var Schema = mongoose.Schema
+
+var User = mongoose.model('User', new Schema ({
+	first: String,
+	last: String,
+	email: {type: String, unique: true},
+	password: {type: String, index: true}
+}));
+
 
